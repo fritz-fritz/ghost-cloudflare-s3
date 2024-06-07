@@ -259,6 +259,7 @@ export default class CloudflareR2Adapter extends StorageBase {
   private ghostResize: boolean;
   private contentPrefix: string;
   private saveOrigNameMetadata: boolean;
+  private cacheControl: string;
 
   constructor(config: Config = {}) {
     log.debug('Initialising ghost-cloudflare-r2 storage adapter');
@@ -320,7 +321,7 @@ export default class CloudflareR2Adapter extends StorageBase {
       config.GHOST_STORAGE_ADAPTER_R2_SAVE_ORIG_NAME_METADATA
     );
 
-    this.cachecontrol = <string>(
+    this.cacheControl = <string>(
       config.GHOST_STORAGE_ADAPTER_R2_CACHE_CONTROL
     );
 
@@ -504,8 +505,8 @@ export default class CloudflareR2Adapter extends StorageBase {
               };
 
               // Only set CacheControl if it's not an empty string
-              if (this.cachecontrol !== '') {
-                params.CacheControl = this.cachecontrol;
+              if (this.cacheControl !== '') {
+                params.CacheControl = this.cacheControl;
               }
               
               return this.S3.send(
@@ -641,8 +642,8 @@ export default class CloudflareR2Adapter extends StorageBase {
           }
 
           // Only set CacheControl if it's not an empty string
-          if (this.cachecontrol !== '') {
-            params.CacheControl = this.cachecontrol;
+          if (this.cacheControl !== '') {
+            params.CacheControl = this.cacheControl;
           }
           
           this.S3.send(
