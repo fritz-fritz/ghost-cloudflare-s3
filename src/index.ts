@@ -36,6 +36,14 @@ export interface FileInfo extends StorageBase.Image {
   // type?: string;
 }
 
+interface PutObjectParams {
+  Bucket: string;
+  Body: Buffer;
+  ContentType: string;
+  Key: string;
+  CacheControl?: string;
+}
+
 function stripLeadingSlash(s: string): string {
   return s.indexOf('/') === 0 ? s.substring(1) : s;
 }
@@ -497,7 +505,7 @@ export default class CloudflareR2Adapter extends StorageBase {
                 filePathR2
               );
 
-              let params = {
+              let params: PutObjectParams = {
                   Bucket: this.bucket,
                   Body: resizedBuffer,
                   ContentType: fileInfo.type,
@@ -633,7 +641,7 @@ export default class CloudflareR2Adapter extends StorageBase {
             }
           }
           
-          let params = {
+          let params: PutObjectParams = {
               Bucket: this.bucket,
               Body: fileBuffer,
               ContentType: fileInfo.type,
