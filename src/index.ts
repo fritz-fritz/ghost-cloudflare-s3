@@ -42,7 +42,7 @@ interface PutObjectParams {
   ContentType: string;
   Key: string;
   CacheControl?: string;
-  Metadata?: { [key: string]: string };
+  Metadata?: Record<string, string>;
 }
 
 function stripLeadingSlash(s: string): string {
