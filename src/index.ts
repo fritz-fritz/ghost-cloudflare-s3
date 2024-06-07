@@ -98,6 +98,7 @@ interface Config {
   GHOST_STORAGE_ADAPTER_R2_SAVE_ORIGINAL?: boolean;
   GHOST_STORAGE_ADAPTER_R2_GHOST_RESIZE?: boolean;
   GHOST_STORAGE_ADAPTER_R2_SAVE_ORIG_NAME_METADATA?: boolean;
+  GHOST_STORAGE_ADAPTER_R2_CACHE_CONTROL?: string;
 }
 
 function getBooleanFromEnv(envName: string): boolean | undefined {
@@ -203,6 +204,11 @@ function mergeConfigWithEnv(config: Config): Config {
   config.GHOST_STORAGE_ADAPTER_R2_SAVE_ORIG_NAME_METADATA =
     saveNameMetadata ??
     (config.GHOST_STORAGE_ADAPTER_R2_SAVE_ORIG_NAME_METADATA || false);
+
+  config.GHOST_STORAGE_ADAPTER_R2_CACHE_CONTROL =
+    process.env.GHOST_STORAGE_ADAPTER_R2_CACHE_CONTROL ||
+    config.GHOST_STORAGE_ADAPTER_R2_CACHE_CONTROL ||
+    '';
 
   return config;
 }
@@ -312,6 +318,10 @@ export default class CloudflareR2Adapter extends StorageBase {
     this.ghostResize = <boolean>config.GHOST_STORAGE_ADAPTER_R2_GHOST_RESIZE;
     this.saveOrigNameMetadata = <boolean>(
       config.GHOST_STORAGE_ADAPTER_R2_SAVE_ORIG_NAME_METADATA
+    );
+
+    this.cachecontrol = <string>(
+      config.GHOST_STORAGE_ADAPTER_R2_CACHE_CONTROL
     );
 
     log.info(
@@ -486,14 +496,20 @@ export default class CloudflareR2Adapter extends StorageBase {
                 filePathR2
               );
 
-              return this.S3.send(
-                new PutObjectCommand({
+              let params = {
                   Bucket: this.bucket,
                   Body: resizedBuffer,
                   ContentType: fileInfo.type,
-                  CacheControl: `max-age=${30 * 24 * 60 * 60}`,
                   Key: stripLeadingSlash(filePathR2),
-                })
+              };
+
+              // Only set CacheControl if it's not an empty string
+              if (this.cachecontrol !== '') {
+                params.CacheControl = this.cachecontrol;
+              }
+              
+              return this.S3.send(
+                new PutObjectCommand(params)
               ).then(() => {
                 log.info('Saved', filePathR2);
               });
@@ -615,15 +631,22 @@ export default class CloudflareR2Adapter extends StorageBase {
               metadata = {original_name: path.basename(fileInfo.originalname)};
             }
           }
-          this.S3.send(
-            new PutObjectCommand({
+          
+          let params = {
               Bucket: this.bucket,
               Body: fileBuffer,
               ContentType: fileInfo.type,
-              CacheControl: `max-age=${30 * 24 * 60 * 60}`,
               Key: stripLeadingSlash(filePathR2),
               Metadata: metadata,
-            })
+          }
+
+          // Only set CacheControl if it's not an empty string
+          if (this.cachecontrol !== '') {
+            params.CacheControl = this.cachecontrol;
+          }
+          
+          this.S3.send(
+            new PutObjectCommand(params)
           ).then(
             () => {
               log.info('Saved', filePathR2);
@@ -667,3 +690,4 @@ export default class CloudflareR2Adapter extends StorageBase {
 }
 
 module.exports = CloudflareR2Adapter;
+

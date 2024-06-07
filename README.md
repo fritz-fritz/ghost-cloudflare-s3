@@ -60,6 +60,7 @@ The storage adapter makes use of the following environment variables:
 | `GHOST_STORAGE_ADAPTER_R2_RESIZE_JPEG_QUALITY`     | Quality to use when resizing JPEG images. Default: `80`                                                                                                                                             |
 | `GHOST_STORAGE_ADAPTER_R2_LOG_LEVEL`               | Log level for the storage adapter. Default `info`. Allowed values `debug`, `info`, `warn`, `error`                                                                                                  |
 | `GHOST_STORAGE_ADAPTER_R2_SAVE_ORIG_NAME_METADATA` | Save the original file name in the object Metadata under the key `original_name`. Useful for correlating original images to images with UUID names. Default `false`. Allowed values `true`, `false` |
+| `GHOST_STORAGE_ADAPTER_R2_CACHE_CONTROL` | Configure the CacheControl Header of uploaded content. Default is `''` which does not set the Header. Accepts any string value for the key e.g. `"public, max-age=86400"` |
 
 All environment variables can also be used as keys in the JSON config.
 The following Ghost configuration is required to activate the plugin for `images`, `media`, and `files`:
