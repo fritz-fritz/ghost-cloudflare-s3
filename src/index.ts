@@ -573,7 +573,7 @@ export default class CloudflareR2Adapter extends StorageBase {
     );
 
     let isImport = false;
-    if (targetDir) {
+    if ( targetDir && !this.isOriginalImage(fileInfo) ) {
       log.info('Cloudflare R2 Storage Adapter: save(): Detected import.');
       isImport = true;
       fileInfo.name = path.basename(fileInfo.name);
